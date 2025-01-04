@@ -38,6 +38,7 @@ Route::post('/logoutpasien', function () {
 
 // route untuk admin
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/dokter/search', [AdminController::class, 'searchDokter'])->name('admin.dokter.search');
     Route::get('/dashboard', [AdminController::class, 'showDashboard'])->name('admin.dashboard');
     Route::get('/view/poli', [AdminController::class, 'showPoli'])->name('admin.poli');
     Route::get('/view/dokter', [AdminController::class, 'showDokter'])->name('admin.dokter');

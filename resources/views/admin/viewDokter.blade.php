@@ -40,6 +40,7 @@
         <h1>Dokter</h1>
 
         <a href="{{ route('admin.dokter.create') }}" class="btn btn-primary mb-3">Tambah Dokter</a>
+        <a href="{{ route('admin.dokter.search') }}" class="btn btn-info mb-3">Cari Dokter</a>
 
         <table class="table table-striped">
             <thead>

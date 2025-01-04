@@ -349,4 +349,18 @@ class AdminController extends Controller
 
         return redirect()->route('admin.obat')->with('success', 'Data Obat berhasil dihapus.');
     }
+
+    //search dokter
+    public function searchDokter(Request $request)
+    {
+        $search = $request->get('search');
+        $dokter = Dokter::when($search, function ($query, $search) {
+            return $query->where('nama', 'like', "%{$search}%")
+                         ->orWhere('alamat', 'like', "%{$search}%")
+                         ->orWhere('no_hp', 'like', "%{$search}%");
+        })->with('poli')->get();
+
+        return view('admin.searchDokter', compact('dokter', 'search'));
+    }
+
 }
