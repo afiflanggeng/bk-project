@@ -63,16 +63,36 @@
                         <td>{{ $d->poli->nama_poli }}</td>
                         <td>
                             <a href="{{ route('admin.dokter.edit', $d->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                            <form action="{{ route('admin.dokter.hapus', $d->id) }}" method="POST"
-                                style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
-                            </form>
+                            <form id="delete-form-{{ $d->id }}" action="{{ route('admin.dokter.hapus', $d->id) }}" method="POST"
+    style="display:none;">
+    @csrf
+    @method('DELETE')
+</form>
+<button onclick="confirmDelete('{{ $d->id }}')" class="btn btn-danger btn-sm">Hapus</button>
+
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
-@endsection
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data akan dihapus secara permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            });
+        }
+    </script>
+    @endsection

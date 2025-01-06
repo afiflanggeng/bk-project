@@ -62,16 +62,34 @@
                         <td>{{ $p->no_rm }}</td>
                         <td>
                             <a href="{{ route('admin.pasien.edit', $p->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                            <form action="{{ route('admin.pasien.hapus', $p->id) }}" method="POST"
-                                style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
-                            </form>
+                            <form id="delete-form-{{ $p->id }}" action="{{ route('admin.pasien.hapus', $p->id) }}" method="POST"
+    style="display:none;">
+    @csrf
+    @method('DELETE')
+</form>
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data akan dihapus secara permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            });
+        }
+    </script>
 @endsection

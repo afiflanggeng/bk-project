@@ -60,15 +60,35 @@
                         <td>{{ $o->harga }}</td>
                         <td>
                             <a href="{{ route('admin.obat.edit', $o->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                            <form action="{{ route('admin.obat.hapus', $o->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
-                            </form>
+                            <form id="delete-form-{{ $o->id }}" action="{{ route('admin.obat.hapus', $o->id) }}" method="POST"
+    style="display:none;">
+    @csrf
+    @method('DELETE')
+</form>
+<button onclick="confirmDelete('{{ $o->id }}')" class="btn btn-danger btn-sm">Hapus</button>
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data akan dihapus secara permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            });
+        }
+    </script>
 @endsection
