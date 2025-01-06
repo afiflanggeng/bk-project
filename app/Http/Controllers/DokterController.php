@@ -29,14 +29,17 @@ class DokterController extends Controller
     }
     public function detailPemeriksaan(Request $request)
     {
-        $dataperiksa = Periksa::where("id", "=", $request->id)->first();
-        $datapoli = DaftarPoli::where("id", "=", $dataperiksa->id_daftar_poli)->with('pasien')->get();
+        $dataperiksa = Periksa::findOrFail($request->id);
+        $datapoli = DaftarPoli::where("id", $dataperiksa->id_daftar_poli)
+            ->with('pasien')
+            ->firstOrFail();
         $dataobat = Obat::all();
-        $valoption = "";
-        foreach ($dataobat as $data) {
-            $valoption .= '<option value="' . $data->id . '">' . $data->nama_obat . '</option>';
-        }
-        return view('dokter.detailpemeriksaan', ["datapoli" => $datapoli, "dataobat" => $valoption]);
+        $valoption = $dataobat->map(fn($obat) => "<option value='{$obat->id}'>{$obat->nama_obat}</option>")->join('');
+
+        return view('dokter.detailpemeriksaan', [
+            "datapoli" => $datapoli,
+            "dataobat" => $valoption
+        ]);
     }
     public function simpantanggal(Request $request)
     {
@@ -49,55 +52,62 @@ class DokterController extends Controller
     }
     public function simpanpemeriksaan(Request $request)
     {
-        $dataperiksa = Periksa::where("id", "=", $request->idperiksa)->first();
-        $dataperiksa->catatan = $request->catatan;
-        $dataperiksa->biaya_periksa = $request->nominal;
-        $dataperiksa->save();
-        foreach ($request->namaobat as $data) {
-            $dataobat = new DetailPeriksa();
-            $dataobat->id_periksa = $request->idperiksa;
-            $dataobat->id_obat = $data;
-            $dataobat->save();
+        $request->validate([
+            'idperiksa' => 'required|exists:periksa,id',
+            'catatan' => 'required|string',
+            'nominal' => 'required|numeric|min:0',
+            'namaobat' => 'required|array|min:1',
+            'namaobat.*' => 'exists:obat,id',
+        ]);
+
+        $dataperiksa = Periksa::findOrFail($request->idperiksa);
+        $dataperiksa->update([
+            'catatan' => $request->catatan,
+            'biaya_periksa' => $request->nominal,
+        ]);
+
+        foreach ($request->namaobat as $idObat) {
+            DetailPeriksa::create([
+                'id_periksa' => $dataperiksa->id,
+                'id_obat' => $idObat,
+            ]);
         }
-        // echo $dataperiksa;
+
         return redirect()->route('dokter.dashboard');
     }
     public function historypasien()
     {
-        $listpasien = DaftarPoli::with('pasien', 'periksa')->get();
-        $datadokter = array();
-        foreach ($listpasien as $item) {
-            $datae = JadwalPeriksa::where('id', '=', $item->id_jadwal)->first();
-            array_push($datadokter, $datae->id_dokter);
-        }
-        return view('dokter.dokterhistory', compact('listpasien', 'datadokter'));
+        $listpasien = DaftarPoli::with(['pasien', 'periksa'])
+            ->get()
+            ->filter(function ($item) {
+                $jadwal = JadwalPeriksa::find($item->id_jadwal);
+                return $jadwal && $jadwal->id_dokter === auth()->user()->id;
+            });
+
+        return view('dokter.dokterhistory', compact('listpasien'));
     }
     public function detailpasien(Request $request)
     {
-        $datasend = array();
-        $datapasien = Pasien::where("id", "=", $request->id)->first();
-        $datapolis = DaftarPoli::where("id_pasien", "=", $datapasien->id)->get();
-        $datasend["namapasien"] = $datapasien->nama;
-        $datasend["no_hp"] = $datapasien->no_hp;
-        $datapushtmp = array();
-        foreach ($datapolis as $data) {
-            $datapush = array();
-            $dataperiksa = Periksa::where("id_daftar_poli", "=", $data->id)->first();
-            $datapush["catatan"] = $dataperiksa->catatan;
-            $datapush["tanggal"] = $dataperiksa->tgl_periksa;
-            $datapush["biaya"] = $dataperiksa->biaya_periksa;
-            $datadetail = DetailPeriksa::where("id_periksa", "=", $dataperiksa->id)->get();
-            $lobat = array();
-            foreach ($datadetail as $dataa) {
-                $obate = Obat::where("id", "=", $dataa->id_obat)->first();
-                array_push($lobat, $obate->nama_obat);
-            }
-            $datapush["obat"] = $lobat;
-            array_push($datapushtmp, $datapush);
-        }
-        $datasend["riwayat"] = $datapushtmp;
+        $datapasien = Pasien::with(['daftarPoli.periksa.detailPeriksa.obat'])
+            ->findOrFail($request->id);
+
+        $datasend = [
+            "namapasien" => $datapasien->nama,
+            "no_hp" => $datapasien->no_hp,
+            "riwayat" => $datapasien->daftarPoli->map(function ($poli) {
+                $periksa = $poli->periksa;
+                return [
+                    "catatan" => $periksa->catatan,
+                    "tanggal" => $periksa->tgl_periksa,
+                    "biaya" => $periksa->biaya_periksa,
+                    "obat" => $periksa->detailPeriksa->map(fn($detail) => $detail->obat->nama_obat)->toArray(),
+                ];
+            }),
+        ];
+
         return view('dokter.detailpasien', ["data" => $datasend]);
     }
+
 
     public function updateAkun(Request $request)
     {
