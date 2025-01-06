@@ -67,7 +67,8 @@
     @csrf
     @method('DELETE')
 </form>
-                        </td>
+<button onclick="confirmDelete('{{ $p->id }}')" class="btn btn-danger btn-sm">Hapus</button> 
+</td>
                     </tr>
                 @endforeach
             </tbody>
