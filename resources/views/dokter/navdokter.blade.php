@@ -37,8 +37,11 @@
                 <a class="nav-link" href="{{ route('dokter.profile') }}">Pengaturan</a>
             </li>
             <li class="nav-item">   
-                <a class="nav-link" href="{{route('dokter.jadwaldokter')}}">Jadwal</a>
+                <a class="nav-link" href="{{route('dokter.jadwaldokter')}}"> Input Jadwal</a>
             </li>
+            <li class="nav-item">  
+                <a class="nav-link" href="{{ route('dokter.lihatJadwal') }}">Lihat Jadwal</a>  
+            </li>  
             <li class="nav-item">
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf

@@ -96,3 +96,8 @@ Route::prefix('dokter')->middleware(['auth', 'role:dokter'])->group(function () 
     Route::get("/jadwaldokter", [DokterController::class, 'jadwaldokter'])->name(name: 'dokter.jadwaldokter');
     Route::post('/simpanjadwal', [DokterController::class, 'simpanjadwal'])->name('dokter.simpanjadwal');
 });
+
+Route::get('/dokter/jadwal', [DokterController::class, 'lihatJadwal'])->name('dokter.lihatJadwal');  
+Route::put('/dokter/jadwal/{id}', [DokterController::class, 'updateJadwal'])->name('dokter.updateJadwal');
+Route::delete('/dokter/jadwal/{id}', [DokterController::class, 'deleteJadwal'])->name('dokter.deleteJadwal');  
+
