@@ -101,3 +101,10 @@ Route::get('/dokter/jadwal', [DokterController::class, 'lihatJadwal'])->name('do
 Route::put('/dokter/jadwal/{id}', [DokterController::class, 'updateJadwal'])->name('dokter.updateJadwal');
 Route::delete('/dokter/jadwal/{id}', [DokterController::class, 'deleteJadwal'])->name('dokter.deleteJadwal');  
 
+Route::get('/dokter/{poli_id}', [DokterController::class, 'index'])->name('pasien.pilih-dokter');  
+Route::get('/get-dokter-by-poli/{id_poli}', [DokterController::class, 'getDokterByPoli']);  
+Route::get('/get-jadwal-dokter/{id_dokter}', [DokterController::class, 'getJadwalDokter']); 
+
+Route::get('/poli', [PatientController::class, 'pilihPoli'])->name('pasien.pilih-poli');  
+Route::get('/dokter/{poli_id}', [PatientController::class, 'pilihDokter'])->name('pasien.pilih-dokter');  
+Route::post('/dokter/submit/{poli_id}', [PatientController::class, 'pilihDokterSubmit'])->name('pasien.pilih-dokter-submit');  
