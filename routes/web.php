@@ -108,3 +108,7 @@ Route::get('/get-jadwal-dokter/{id_dokter}', [DokterController::class, 'getJadwa
 Route::get('/poli', [PatientController::class, 'pilihPoli'])->name('pasien.pilih-poli');  
 Route::get('/dokter/{poli_id}', [PatientController::class, 'pilihDokter'])->name('pasien.pilih-dokter');  
 Route::post('/dokter/submit/{poli_id}', [PatientController::class, 'pilihDokterSubmit'])->name('pasien.pilih-dokter-submit');  
+
+Route::get('/dokter/detail-pemeriksaan/{id}', [DokterController::class, 'detailPemeriksaan'])->name('dokter.detailPemeriksaan');
+
+  

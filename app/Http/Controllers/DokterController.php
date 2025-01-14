@@ -27,20 +27,23 @@ class DokterController extends Controller
         $getdokter = Dokter::where("nama","=",$getnama->name)->first();
         return view('dokter.dokterlistperiksa', compact('listpasien', 'datadokter','getdokter'));
     }
-    public function detailPemeriksaan(Request $request)
-    {
-        $dataperiksa = Periksa::findOrFail($request->id);
-        $datapoli = DaftarPoli::where("id", $dataperiksa->id_daftar_poli)
-            ->with('pasien')
-            ->firstOrFail();
-        $dataobat = Obat::all();
-        $valoption = $dataobat->map(fn($obat) => "<option value='{$obat->id}'>{$obat->nama_obat}</option>")->join('');
-
-        return view('dokter.detailpemeriksaan', [
-            "datapoli" => $datapoli,
-            "dataobat" => $valoption
-        ]);
-    }
+    public function detailPemeriksaan(Request $request, $id)  
+{  
+    // Ambil detail pemeriksaan berdasarkan ID  
+    $dataperiksa = Periksa::findOrFail($id);  
+    $datapoli = DaftarPoli::with('pasien')->where("id", $dataperiksa->id_daftar_poli)->firstOrFail();  
+    $dataobat = Obat::all(); // Ambil semua data obat  
+  
+    // Mengubah data obat menjadi opsi untuk dropdown  
+    $valoption = $dataobat->map(function ($obat) {  
+        return "<option value='{$obat->id}' data-harga='{$obat->harga}'>{$obat->nama_obat} - Rp. {$obat->harga}</option>";  
+    })->join('');  
+  
+    return view('dokter.detailpemeriksaan', [  
+        "datapoli" => $datapoli,  
+        "dataobat" => $valoption  
+    ]);  
+}  
     public function simpantanggal(Request $request)
     {
         $databaru = new Periksa();

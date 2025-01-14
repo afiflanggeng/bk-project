@@ -140,8 +140,8 @@ class PatientController extends Controller
 {  
     // Validasi input dari form  
     $request->validate([  
-        'dokter_id' => 'required|exists:dokters,id', // Perbaiki nama tabel  
-        'jadwal_id' => 'required|exists:jadwal_periksas,id', // Perbaiki nama tabel  
+        'dokter_id' => 'required|exists:dokter,id', // Perbaiki nama tabel  
+        'jadwal_id' => 'required|exists:jadwal_periksa,id', // Perbaiki nama tabel  
         'keluhan' => 'required|string|max:255',  
     ]);  
   
