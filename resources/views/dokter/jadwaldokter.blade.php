@@ -23,6 +23,7 @@
             <label for="jam_selesai">Jam Selesai:</label>  
             <input type="time" class="form-control" id="jam_selesai" name="jam_selesai" required>  
         </div>  
+        
         <div class="form-group">  
             <label for="aktif">Aktif:</label>  
             <input type="checkbox" id="aktif" name="aktif" checked>  
