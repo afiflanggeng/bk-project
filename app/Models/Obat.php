@@ -9,7 +9,7 @@ class Obat extends Model
 {
     use HasFactory;
 
-    protected $table = 'obat';
+    protected $table = 'obats';
     protected $primaryKey = 'id';
     public $incrementing = true;
     protected $keyType = 'int';
@@ -21,7 +21,8 @@ class Obat extends Model
     ];
 
     public $timestamps = false;
-    public function detailperiksa(){
-        return $this->hasOne(DetailPeriksa::class,'id');
+    public function detailperiksa()
+    {
+        return $this->hasOne(DetailPeriksa::class, 'id');
     }
 }

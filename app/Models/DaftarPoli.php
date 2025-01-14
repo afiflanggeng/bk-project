@@ -11,7 +11,7 @@ class DaftarPoli extends Model
 
     public $timestamps = false;
 
-    protected $table = 'daftar_poli';
+    protected $table = 'daftar_polis';
 
     protected $fillable = [
         'id_pasien',
@@ -35,8 +35,9 @@ class DaftarPoli extends Model
     {
         return $this->belongsTo(JadwalPeriksa::class, 'id_jadwal');
     }
-    
-    public function periksa(){
-        return $this->hasOne(Periksa::class,"id_daftar_poli");
+
+    public function periksa()
+    {
+        return $this->hasOne(Periksa::class, "id_daftar_poli");
     }
 }
