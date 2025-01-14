@@ -1,7 +1,7 @@
 @include('dokter.navdokter')  
 <div class="container">  
     <h2>Input Jadwal Dokter</h2>  
-    <p>Jika Anda menginput jam yang bertabrakan dengan jadwal yang sudah ada, jadwal lama akan dinonaktifkan.</p>  
+    
     <form method="POST" action="{{ route('dokter.simpanjadwal') }}">  
         {{ csrf_field() }}  
         <div class="form-group">  

@@ -261,5 +261,17 @@ public function deleteJadwal($id)
     return redirect()->route('dokter.lihatJadwal')->with('success', 'Jadwal berhasil dihapus.');  
 }  
 
+public function index($poli_id)  
+{  
+    // Ambil poli berdasarkan ID  
+    $poli = Poli::findOrFail($poli_id);  
+      
+    // Ambil semua dokter yang terkait dengan poli  
+    $dokters = Dokter::where('id_poli', $poli_id)->with('jadwalPeriksas')->get();  
+      
+    // Kembalikan view dengan data poli dan dokter  
+    return view('pasien.pilih-dokter', compact('poli', 'dokters'));  
+}  
+
     
 }

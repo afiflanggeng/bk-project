@@ -121,77 +121,84 @@ class PatientController extends Controller
     }
 
     // Halaman memilih dokter setelah memilih poli
-    public function pilihDokter(Request $request, Poli $poli)
-    {
-        $pasien_name = $request->pasien_name;  // Ambil nama pasien yang dikirim melalui URL
-        $pasien = Pasien::where('nama', $pasien_name)->first();  // Cari pasien berdasarkan nama
+    public function pilihDokter($poli_id)  
+{  
+    $poli = Poli::findOrFail($poli_id); // Ambil poli berdasarkan ID  
+    $pasien_name = session('pasien_name');  // Ambil nama pasien dari session  
+    $pasien = Pasien::where('nama', $pasien_name)->first();  // Cari pasien berdasarkan nama  
+  
+    if (!$pasien) {  
+        return redirect()->route('pasien.pilih-poli')->with('error', 'Pasien tidak ditemukan.');  
+    }  
+  
+    $dokters = $poli->dokters()->with('jadwalPeriksas')->get();  
+  
+    return view('pasien.pilih-dokter', compact('poli', 'dokters', 'pasien', 'pasien_name'));  
+}  
 
-        if (!$pasien) {
-            return redirect()->route('pasien.pilih-poli')->with('error', 'Pasien tidak ditemukan.');
-        }
+    public function pilihDokterSubmit(Request $request, $poli_id)  
+{  
+    // Validasi input dari form  
+    $request->validate([  
+        'dokter_id' => 'required|exists:dokters,id', // Perbaiki nama tabel  
+        'jadwal_id' => 'required|exists:jadwal_periksas,id', // Perbaiki nama tabel  
+        'keluhan' => 'required|string|max:255',  
+    ]);  
+  
+    // Ambil nama pasien dari session  
+    $pasien_name = session('pasien_name');  
+  
+    // Cari pasien berdasarkan nama  
+    $pasien = Pasien::where('nama', $pasien_name)->first();  
+  
+    if (!$pasien) {  
+        return redirect()->route('pasien.pilih-poli')->with('error', 'Pasien tidak ditemukan.');  
+    }  
+  
+    // Ambil data dokter dan jadwal yang dipilih  
+    $dokter = Dokter::findOrFail($request->dokter_id);  
+    $jadwal = JadwalPeriksa::findOrFail($request->jadwal_id);  
+  
+    // Hitung nomor antrean berdasarkan jadwal  
+    $antreanTerakhir = DaftarPoli::where('id_jadwal', $jadwal->id)->max('no_antrian');  
+    $nomorAntrian = $antreanTerakhir ? $antreanTerakhir + 1 : 1;  
+  
+    // Daftarkan pasien ke daftar poli  
+    DaftarPoli::create([  
+        'id_pasien' => $pasien->id,  
+        'id_jadwal' => $jadwal->id,  
+        'no_antrian' => $nomorAntrian,  
+        'keluhan' => $request->input('keluhan'),  
+    ]);  
+  
+    // Redirect ke halaman jadwal pasien dengan pesan sukses  
+    return redirect()->route('pasien.jadwal')->with('success', 'Anda berhasil mendaftar ke poli. Nomor antrean Anda: ' . $nomorAntrian);  
+}  
 
-        $dokters = $poli->dokters()->with('jadwalPeriksas')->get();
 
-        return view('pasien.pilih-dokter', compact('poli', 'dokters', 'pasien', 'pasien_name'));
-    }
+public function lihatJadwal(Request $request)  
+{  
+    // Ambil nama pasien dari session  
+    $pasien_name = session('pasien_name');  
+  
+    // Cari pasien berdasarkan nama  
+    $pasien = Pasien::where('nama', $pasien_name)->first();  
+  
+    // Periksa apakah pasien ditemukan  
+    if (!$pasien) {  
+        return redirect()->route('pasien.pilih-poli')->with('error', 'Pasien tidak ditemukan.');  
+    }  
+  
+    // Ambil semua daftar poli yang terkait dengan pasien  
+    $daftarPolis = DaftarPoli::where('id_pasien', $pasien->id)->get();  
+  
+    // Periksa apakah ada daftar poli  
+    if ($daftarPolis->isEmpty()) {  
+        return redirect()->route('pasien.pilih-poli')->with('error', 'Tidak ada jadwal yang ditemukan untuk pasien ini.');  
+    }  
+  
+    // Mengirimkan data ke view  
+    return view('pasien.jadwal', compact('daftarPolis'));  
+}  
 
-    public function pilihDokterSubmit(Request $request, Poli $poli)
-    {
-        // Validasi input dari form
-        $request->validate([
-            'dokter_id' => 'required|exists:dokter,id',
-            'jadwal_id' => 'required|exists:jadwal_periksa,id',
-            'keluhan' => 'required',
-        ]);
-
-        // Ambil nama pasien dari session atau parameter
-        $pasien_name = session('pasien_name');
-
-        // Cari pasien berdasarkan nama
-        $pasien = Pasien::where('nama', $pasien_name)->first();
-
-        if (!$pasien) {
-            return redirect()->route('pasien.pilih-poli')->with('error', 'Pasien tidak ditemukan.');
-        }
-
-        // Ambil data dokter dan jadwal yang dipilih
-        $dokter = Dokter::findOrFail($request->dokter_id);
-        $jadwal = JadwalPeriksa::findOrFail($request->jadwal_id);
-
-        // Hitung nomor antrean berdasarkan jadwal
-        $antreanTerakhir = DaftarPoli::where('id_jadwal', $jadwal->id)->max('no_antrian');
-        $nomorAntrian = $antreanTerakhir ? $antreanTerakhir + 1 : 1;
-
-        // Daftarkan pasien ke daftar poli
-        DaftarPoli::create([
-            'id_pasien' => $pasien->id,
-            'id_jadwal' => $jadwal->id,
-            'no_antrian' => $nomorAntrian,
-            'keluhan' => $request->input('keluhan'),
-        ]);
-
-        // Redirect ke halaman jadwal pasien dengan pesan sukses
-        return redirect()->route('pasien.jadwal')->with('success', 'Anda berhasil mendaftar ke poli. Nomor antrean Anda: ' . $nomorAntrian);
-    }
-
-    public function lihatJadwal(Request $request)
-    {
-        // Ambil nama pasien dari session
-        $pasien_name = session('pasien_name');
-
-        // Cari pasien berdasarkan nama
-        $pasien = Pasien::where('nama', $pasien_name)->first();
-
-        // Periksa apakah pasien ditemukan
-        if (!$pasien) {
-            return redirect()->route('pasien.pilih-poli')->with('error', 'Pasien tidak ditemukan.');
-        }
-
-        // Ambil semua daftar poli yang terkait dengan pasien
-        $daftarPolis = DaftarPoli::where('id_pasien', $pasien->id)
-            ->get();
-
-        // Mengirimkan data ke view
-        return view('pasien.jadwal', compact('daftarPolis'));
-    }
 }
