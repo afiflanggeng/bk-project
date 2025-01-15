@@ -7,6 +7,10 @@
             <label for="nama">Nama</label>
             <input type="text" class="form-control" id="nama" name="nama" value="{{ $dokter->nama }}">
         </div>
+        <div class="form-group">  
+            <label for="email">Email</label>  
+            <input type="email" class="form-control" id="email" name="email" value="{{ $user->email }}">  
+        </div>  
         <div class="form-group">
             <label for="id_poli">Poli</label>
             <select class="form-control" id="id_poli" name="id_poli">
@@ -25,3 +29,4 @@
         <a href="{{ route('dokter.dashboard') }}" class="btn btn-danger">Kembali</a>
     </form>
 </div>
+
