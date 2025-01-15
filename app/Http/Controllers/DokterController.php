@@ -53,31 +53,34 @@ class DokterController extends Controller
         $databaru->save();
         return redirect()->route('dokter.dashboard');
     }
-    public function simpanpemeriksaan(Request $request)
-    {
-        $request->validate([
-            'idperiksa' => 'required|exists:periksa,id',
-            'catatan' => 'required|string',
-            'nominal' => 'required|numeric|min:0',
-            'namaobat' => 'required|array|min:1',
-            'namaobat.*' => 'exists:obat,id',
-        ]);
-
-        $dataperiksa = Periksa::findOrFail($request->idperiksa);
-        $dataperiksa->update([
-            'catatan' => $request->catatan,
-            'biaya_periksa' => $request->nominal,
-        ]);
-
-        foreach ($request->namaobat as $idObat) {
-            DetailPeriksa::create([
-                'id_periksa' => $dataperiksa->id,
-                'id_obat' => $idObat,
-            ]);
-        }
-
-        return redirect()->route('dokter.dashboard');
-    }
+    public function simpanpemeriksaan(Request $request)  
+{  
+    $request->validate([  
+        'idperiksa' => 'required|exists:periksa,id',  
+        'catatan' => 'required|string',  
+        'namaobat' => 'required|array|min:1',  
+        'namaobat.*' => 'exists:obat,id',  
+    ]);  
+  
+    // Simpan data pemeriksaan  
+    $dataperiksa = Periksa::findOrFail($request->idperiksa);  
+    $dataperiksa->update([  
+        'catatan' => $request->catatan,  
+        'biaya_periksa' => 150000 + array_sum(array_map(function($id) {  
+            return Obat::find($id)->harga; // Ambil harga obat dari database  
+        }, $request->namaobat)),  
+    ]);  
+  
+    // Simpan detail obat  
+    foreach ($request->namaobat as $idObat) {  
+        DetailPeriksa::create([  
+            'id_periksa' => $dataperiksa->id,  
+            'id_obat' => $idObat,  
+        ]);  
+    }  
+  
+    return redirect()->route('dokter.history')->with('success', 'Data pemeriksaan berhasil disimpan.');  
+}  
     public function historypasien()
     {
         $listpasien = DaftarPoli::with(['pasien', 'periksa'])
@@ -116,6 +119,7 @@ class DokterController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . auth()->id(),
             'id_poli' => 'required|integer',
             'password' => 'nullable|string',
         ]);
@@ -126,6 +130,7 @@ class DokterController extends Controller
 
         $user->name = $request->input('nama');
         $user->password = $request->input('password');
+        $user->email = $request->email;
         $user->save();
 
         if ($user->dokter) {
