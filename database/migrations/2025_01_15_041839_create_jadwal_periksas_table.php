@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('aktif', [0, 1])->default(1);
             $table->timestamps();
 
-            $table->foreign('id_dokter')->references('id')->on('doktors')->onDelete('cascade');
+            $table->foreign('id_dokter')->references('id')->on('doctors')->onDelete('cascade');
         });
     }
 

@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('detail_periksas', function (Blueprint $table) {
+        Schema::create('doctors', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('id_periksa');
-            $table->unsignedInteger('id_obat');
+            $table->string('nama');
+            $table->string('alamat');
+            $table->string('no_hp');
+            $table->unsignedInteger('id_poli');
             $table->timestamps();
 
-            $table->foreign('id_periksa')->references('id')->on('periksas')->onDelete('cascade');
-            $table->foreign('id_obat')->references('id')->on('obats')->onDelete('cascade');
+            $table->foreign('id_poli')->references('id')->on('polis')->onDelete('cascade');
         });
     }
 
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('detail_periksas');
+        Schema::dropIfExists('doctors');
     }
 };
