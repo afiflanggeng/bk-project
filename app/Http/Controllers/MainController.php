@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -27,10 +28,11 @@ class MainController extends Controller
 
         // Check if the user exists and the password matches directly
         if (
-            !$user || $user->password !== $request->password
+            !$user && $user->password !== $request->password
         ) {
             return back()->with('error', 'Email atau password salah.');
         }
+
 
         // Log the user in
         Auth::login($user);
@@ -39,7 +41,7 @@ class MainController extends Controller
         if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
         } else if ($user->role === 'dokter') {
-            $request->session()->put("idlogin",$user->id);
+            $request->session()->put("idlogin", $user->id);
             return redirect()->route('dokter.dashboard');
         } else {
             return redirect()->route('pasien.pilih-poli');

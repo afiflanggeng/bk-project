@@ -9,7 +9,7 @@ class JadwalPeriksa extends Model
 {
     use HasFactory;
     public $timestamps = false;
-    protected $table = 'jadwal_periksa';
+    protected $table = 'jadwal_periksas';
 
     protected $fillable = [
         'id_dokter',

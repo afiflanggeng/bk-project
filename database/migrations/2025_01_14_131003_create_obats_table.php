@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('jadwal_periksa', function (Blueprint $table) {
-            $table->boolean('aktif')->default(true); // Menambahkan kolom aktif dengan default true  
+        Schema::create('obats', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('nama_obat');
+            $table->string('kemasan');
+            $table->integer('harga');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('jadwal_periksa', function (Blueprint $table) {
-            $table->dropColumn('aktif'); // Menghapus kolom aktif jika migrasi dibatalkan 
-        });
+        Schema::dropIfExists('obats');
     }
 };

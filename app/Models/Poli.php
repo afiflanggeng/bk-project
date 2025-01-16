@@ -9,7 +9,7 @@ class Poli extends Model
 {
     use HasFactory;
 
-    protected $table = 'poli';
+    protected $table = 'polis';
     protected $fillable = ['nama_poli', 'keterangan'];
 
     // Nonaktifkan timestamps
