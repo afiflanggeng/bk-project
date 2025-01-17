@@ -99,9 +99,14 @@ class PatientController extends Controller
             $pasien->no_ktp = $request->input('no_ktp');
             $pasien->no_hp = $request->input('no_hp');
             $pasien->save();
+
+             // Generate no_rm dan update pasien dengan no_rm yang dihasilkan  
+            $no_rm = $this->generateNoRm();  
+            $pasien->no_rm = $no_rm;  
+            $pasien->save();  
         }
 
-        return redirect()->route('login_pasien')->with('success', 'Registration successful. Please log in.');
+        return redirect()->route('login_pasien')->with('success', 'Registration Sukses. Silahkan log in.');
     }
 
     // Function to generate a unique no_rm
@@ -109,7 +114,7 @@ class PatientController extends Controller
     {
         $currentYearMonth = now()->format('Ym'); // Example: 202411
         $patientsCount = Pasien::count();
-        return 'RM-' . $currentYearMonth . '-' . str_pad($patientsCount + 1, 3, '0', STR_PAD_LEFT);
+        return $currentYearMonth . '-' . str_pad($patientsCount + 1, 3, '0', STR_PAD_LEFT);
     }
 
     // Halaman memilih poli
@@ -153,6 +158,16 @@ class PatientController extends Controller
   
     if (!$pasien) {  
         return redirect()->route('pasien.pilih-poli')->with('error', 'Pasien tidak ditemukan.');  
+    } 
+
+   // Cek apakah nr_medis null dan generate jika perlu 
+    $user = User::where('name', $pasien_name)->first();
+      if (!$user) {  
+        return redirect()->route('pasien.pilih-poli')->with('error', 'User tidak ditemukan.');  
+    }  
+    if (is_null($user->nr_medis)) {  
+        $user->nr_medis = $this->generateNrMedis(); // Panggil fungsi untuk generate nr_medis  
+        $user->save(); // Simpan perubahan  
     }  
   
     // Ambil data dokter dan jadwal yang dipilih  
@@ -173,6 +188,23 @@ class PatientController extends Controller
   
     // Redirect ke halaman jadwal pasien dengan pesan sukses  
     return redirect()->route('pasien.jadwal')->with('success', 'Anda berhasil mendaftar ke poli. Nomor antrean Anda: ' . $nomorAntrian);  
+}  
+
+private function generateNrMedis()  
+{  
+    // Ambil tahun dan bulan saat ini  
+    $currentYearMonth = now()->format('Ym'); // Format YYYYMM  
+  
+    // Cari jumlah user yang memiliki nr_medis pada bulan ini  
+    $count = User::where('nr_medis', 'like', $currentYearMonth . '-%')->count();  
+  
+    // Tambahkan 1 untuk urutan berikutnya  
+    $sequence = $count + 1;  
+  
+    // Format nr_medis (misal: 202301-001)  
+    $nr_medis = $currentYearMonth . '-' . str_pad($sequence, 3, '0', STR_PAD_LEFT);  
+  
+    return $nr_medis;  
 }  
 
 
